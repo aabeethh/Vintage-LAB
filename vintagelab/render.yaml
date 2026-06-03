@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: vintagelab
+    env: python
+    plan: starter
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+      apt-get update -qq && apt-get install -y -qq ffmpeg
+    startCommand: gunicorn run:app --workers 2 --timeout 120 --bind 0.0.0.0:$PORT
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.12.0
+    disk:
+      name: vintagelab-storage
+      mountPath: /app/app/uploads
+      sizeGB: 1

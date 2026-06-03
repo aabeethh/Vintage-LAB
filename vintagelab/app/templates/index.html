@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="theme-color" content="#000000">
+  <title>VintageLab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+
+  <!-- ── TOP BAR ──────────────────────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="app-logo">VintageLab</span>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" id="btnSample" title="Sample images">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/></svg>
+        <span>SAMPLE</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── VIEWFINDER / PREVIEW ─────────────────────────────────────────── -->
+  <div class="viewfinder" id="viewfinder">
+    <!-- Upload zone (shown when no image) -->
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.heic,.heif,.webp,.mp4,.mov,.avi" hidden>
+      <div class="upload-inner" id="uploadInner">
+        <div class="upload-icon-wrap">
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+            <circle cx="26" cy="26" r="24" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+            <circle cx="26" cy="26" r="10" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+            <circle cx="26" cy="26" r="3" fill="rgba(255,255,255,0.6)"/>
+            <rect x="24" y="10" width="4" height="8" rx="2" fill="rgba(255,255,255,0.3)"/>
+          </svg>
+        </div>
+        <p class="upload-label">Tap to load photo or video</p>
+        <p class="upload-formats">JPG · PNG · HEIC · MP4 · MOV</p>
+      </div>
+      <!-- Progress -->
+      <div class="upload-prog hidden" id="uploadProg">
+        <div class="prog-ring-wrap">
+          <svg width="64" height="64" viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="27" stroke="rgba(255,255,255,0.1)" stroke-width="3" fill="none"/>
+            <circle id="progRing" cx="32" cy="32" r="27" stroke="white" stroke-width="3" fill="none"
+              stroke-dasharray="169.6" stroke-dashoffset="169.6" stroke-linecap="round"
+              transform="rotate(-90 32 32)"/>
+          </svg>
+          <span class="prog-pct" id="progPct">0%</span>
+        </div>
+        <p class="upload-prog-text">Loading…</p>
+      </div>
+    </div>
+
+    <!-- Photo preview -->
+    <div class="media-preview hidden" id="mediaPreview">
+      <img id="previewImg" src="" alt="Preview" draggable="false">
+      <video id="previewVideo" autoplay muted loop playsinline webkit-playsinline></video>
+      <!-- Processing overlay -->
+      <div class="processing-overlay hidden" id="processingOverlay">
+        <div class="shutter-spin">
+          <div class="shutter-b"></div><div class="shutter-b"></div>
+          <div class="shutter-b"></div><div class="shutter-b"></div>
+        </div>
+        <p class="proc-label" id="procLabel">Developing…</p>
+        <div class="proc-bar-wrap hidden" id="procBarWrap">
+          <div class="proc-bar"><div class="proc-fill" id="procFill"></div></div>
+          <span class="proc-pct" id="procPct">0%</span>
+        </div>
+      </div>
+      <!-- Before/after toggle -->
+      <div class="ba-wrap hidden" id="baWrap">
+        <div class="ba-slider" id="baSlider">
+          <img class="ba-before" id="baBefore" src="" alt="before" draggable="false">
+          <div class="ba-after-clip" id="baAfterClip">
+            <img class="ba-after" id="baAfter" src="" alt="after" draggable="false">
+          </div>
+          <div class="ba-handle" id="baHandle">
+            <div class="bah-line"></div>
+            <div class="bah-circle">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M6 4.5L2 9l4 4.5M12 4.5L16 9l-4 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+              </svg>
+            </div>
+            <div class="bah-line"></div>
+          </div>
+        </div>
+        <span class="ba-label-before">BEFORE</span>
+        <span class="ba-label-after">AFTER</span>
+      </div>
+      <!-- Top HUD -->
+      <div class="hud-top" id="hudTop">
+        <button class="hud-btn" id="btnCompare" title="Compare before/after">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M3 5l5-3 5 3M3 11l5 3 5-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <span class="hud-filter-name" id="hudFilterName"></span>
+        <button class="hud-btn" id="btnNewMedia" title="New photo">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8a6 6 0 1 0 11.6-2M14 2v4h-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CAMERA SELECTOR ───────────────────────────────────────────────── -->
+  <div class="cam-panel" id="camPanel">
+
+    <!-- Category tabs -->
+    <div class="cat-tabs" id="catTabs" role="tablist">
+      <button class="cat-tab active" data-cat="Video">Video</button>
+      <button class="cat-tab" data-cat="Film">Film</button>
+      <button class="cat-tab" data-cat="Instant">Instant</button>
+    </div>
+
+    <!-- Camera scroll row -->
+    <div class="cam-scroll-wrap">
+      <div class="cam-row" id="camRow" role="listbox">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- Bottom actions row -->
+    <div class="action-row">
+      <button class="action-btn action-upload" id="actionUpload">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 16V8M8 12l4-4 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="shutter-btn" id="shutterBtn" disabled>
+        <div class="shutter-outer">
+          <div class="shutter-inner"></div>
+        </div>
+      </button>
+      <button class="action-btn action-download hidden" id="actionDownload">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 4v12M7 12l5 5 5-5M4 20h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="action-btn action-placeholder hidden" id="actionPlaceholder">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── TOAST ─────────────────────────────────────────────────────────── -->
+  <div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
+
+  <!-- Hidden download link -->
+  <a id="dlLink" href="#" download style="display:none"></a>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
