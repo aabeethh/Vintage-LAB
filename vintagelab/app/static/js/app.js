@@ -42,7 +42,6 @@ const baBefore       = g('baBefore');
 const baAfter        = g('baAfter');
 const catTabs        = g('catTabs');
 const camRow         = g('camRow');
-const shutterBtn     = g('shutterBtn');
 const actionUpload   = g('actionUpload');
 const actionDownload = g('actionDownload');
 const actionPlaceholder = g('actionPlaceholder');
@@ -131,8 +130,7 @@ function showMedia() {
   processingOv.classList.add('hidden');
   baWrap.classList.add('hidden');
   hudTop.style.display = 'flex';
-  hudFilterName.textContent = '';
-  shutterBtn.disabled = false;
+  hudFilterName.textContent = 'Select a filter';
   actionDownload.classList.add('hidden');
   actionPlaceholder.classList.remove('hidden');
   S.outputFilename = null;
@@ -188,29 +186,27 @@ function renderCams(cat) {
 }
 
 function selectCam(id, name) {
+  if (S.selectedCam === id) return;
   S.selectedCam = id;
   document.querySelectorAll('.cam-card').forEach(c=>{
     const sel = c.dataset.id===id;
     c.classList.toggle('selected',sel);
     c.setAttribute('aria-selected',sel?'true':'false');
   });
+  hudFilterName.textContent = name;
+  if (S.file && !S.processing) {
+    processMedia();
+  }
 }
 
-/* ── Shutter / Process ──────────────────────────────────────────────────── */
-shutterBtn.addEventListener('click', () => {
+/* ── Filter apply / Process ───────────────────────────────────────────────── */
+async function processMedia() {
   if(!S.file) { toast('Load a photo or video first','error'); return; }
   if(!S.selectedCam) { toast('Select a camera filter first','error'); return; }
-  if(S.processing) return;
-  processMedia();
-});
-
-async function processMedia() {
   S.processing = true;
   S.outputFilename = null;
   S.comparing = false;
   baWrap.classList.add('hidden');
-  shutterBtn.classList.add('processing');
-  shutterBtn.disabled = true;
   actionDownload.classList.add('hidden');
 
   processingOv.classList.remove('hidden');
@@ -300,8 +296,6 @@ function showResult(camName) {
 
 function doneProcessing() {
   S.processing = false;
-  shutterBtn.classList.remove('processing');
-  shutterBtn.disabled = false;
 }
 
 /* ── Download ───────────────────────────────────────────────────────────── */
@@ -356,7 +350,6 @@ function resetApp() {
   uploadProg.classList.add('hidden');
   processingOv.classList.add('hidden');
   baWrap.classList.add('hidden');
-  shutterBtn.disabled=true;
   actionDownload.classList.add('hidden');
   actionPlaceholder.classList.remove('hidden');
   hudFilterName.textContent='';
